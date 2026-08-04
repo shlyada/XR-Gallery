@@ -1,8 +1,9 @@
 export default class AnimationLoop {
 
 
-    constructor(callback){
+    constructor(renderer, callback){
 
+        this.renderer = renderer;
         this.callback = callback;
 
     }
@@ -10,17 +11,15 @@ export default class AnimationLoop {
 
     start(){
 
-        const loop = () => {
+        this.renderer.setAnimationLoop(
+            ()=>{
 
-            this.callback();
+                this.callback();
 
-            requestAnimationFrame(loop);
-
-        };
-
-
-        loop();
+            }
+        );
 
     }
+
 
 }

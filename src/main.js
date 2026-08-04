@@ -4,6 +4,7 @@ import Renderer from "./core/Renderer.js";
 import Lighting from "./core/Lighting.js";
 import AnimationLoop from "./core/AnimationLoop.js";
 import * as THREE from "three";
+import XRManager from "./xr/XRManager.js";
 
 
 
@@ -17,6 +18,12 @@ const camera =
 
 const renderer =
     new Renderer();
+
+
+const xr =
+    new XRManager(
+        renderer.renderer
+    );
 
 
 
@@ -47,6 +54,7 @@ sceneManager.scene.add(
 
 const loop =
     new AnimationLoop(
+        renderer.renderer,
         ()=>{
 
             renderer.render(
@@ -56,6 +64,3 @@ const loop =
 
         }
     );
-
-
-loop.start();

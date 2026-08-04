@@ -6,10 +6,11 @@ export default class Renderer {
 
     constructor(){
 
-        this.renderer =
-            new THREE.WebGLRenderer({
-                antialias:true
-            });
+    this.renderer =
+        new THREE.WebGLRenderer({
+            antialias:true,
+            alpha:true
+        });
 
 
         this.renderer.setSize(
@@ -21,6 +22,8 @@ export default class Renderer {
         this.renderer.setPixelRatio(
             window.devicePixelRatio
         );
+
+        this.renderer.xr.enabled = false;
 
 
         document.body.appendChild(
