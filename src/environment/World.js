@@ -1,3 +1,5 @@
+import { Island } from "./Island.js";
+
 export class World {
 
     constructor(scene) {
@@ -8,8 +10,19 @@ export class World {
 
     }
 
-
     initialize() {
+
+        this.createEnvironment();
+
+    }
+
+    createEnvironment() {
+
+        const island = new Island();
+
+        this.scene.add(
+            island.group
+        );
 
         console.log("XR World initialized");
 

@@ -46,29 +46,6 @@ new Lighting(
 );
 
 
-// Temporary test cube (will be removed later)
-const geometry =
-    new THREE.BoxGeometry();
-
-
-const material =
-    new THREE.MeshStandardMaterial({
-        color: 0xff69b4
-    });
-
-
-const cube =
-    new THREE.Mesh(
-        geometry,
-        material
-    );
-
-
-sceneManager.scene.add(
-    cube
-);
-
-
 // Start animation loop
 const loop =
     new AnimationLoop(
@@ -82,3 +59,5 @@ const loop =
 
         }
     );
+
+loop.start();

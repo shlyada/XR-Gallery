@@ -6,6 +6,8 @@ export default class AnimationLoop {
         this.renderer = renderer;
         this.callback = callback;
 
+        this.start();
+
     }
 
 
