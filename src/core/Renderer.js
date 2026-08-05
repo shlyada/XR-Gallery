@@ -1,30 +1,40 @@
 import * as THREE from "three";
 
-
 export default class Renderer {
 
+    constructor() {
 
-    constructor(){
+        this.renderer = new THREE.WebGLRenderer({
 
-    this.renderer =
-        new THREE.WebGLRenderer({
-            antialias:true,
-            alpha:true
+            antialias: true,
+            alpha: false
+
         });
-
 
         this.renderer.setSize(
             window.innerWidth,
             window.innerHeight
         );
 
-
         this.renderer.setPixelRatio(
-            window.devicePixelRatio
+            Math.min(window.devicePixelRatio, 2)
         );
 
-        this.renderer.xr.enabled = false;
+        // Better color management
+        this.renderer.outputColorSpace =
+            THREE.SRGBColorSpace;
 
+        // Filmic tone mapping
+        this.renderer.toneMapping =
+            THREE.ACESFilmicToneMapping;
+
+        this.renderer.toneMappingExposure = 1.15;
+
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type =
+            THREE.PCFSoftShadowMap;
+
+        this.renderer.xr.enabled = false;
 
         document.body.appendChild(
             this.renderer.domElement
@@ -32,18 +42,13 @@ export default class Renderer {
 
     }
 
+    render(scene, camera) {
 
-    render(scene,camera){
-
-        this.renderer.render(
-            scene,
-            camera
-        );
+        this.renderer.render(scene, camera);
 
     }
 
-
-    resize(){
+    resize() {
 
         this.renderer.setSize(
             window.innerWidth,

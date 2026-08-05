@@ -5,21 +5,22 @@ export default class Camera {
     constructor() {
 
         this.camera = new THREE.PerspectiveCamera(
-            75,
+            60,
             window.innerWidth / window.innerHeight,
             0.1,
             1000
         );
 
+        // Pull back and look slightly down toward the island
         this.camera.position.set(
             0,
             4,
-            9
+            12
         );
 
         this.camera.lookAt(
             0,
-            1.5,
+            2,
             0
         );
 
@@ -28,8 +29,7 @@ export default class Camera {
     resize() {
 
         this.camera.aspect =
-            window.innerWidth /
-            window.innerHeight;
+            window.innerWidth / window.innerHeight;
 
         this.camera.updateProjectionMatrix();
 
