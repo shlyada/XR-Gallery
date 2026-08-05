@@ -6,9 +6,7 @@ export default class SceneManager {
 
         this.scene = new THREE.Scene();
 
-        this.scene.background = new THREE.Color(
-            0x87ceeb
-        );
+        this.scene.background = null;
 
     }
 
