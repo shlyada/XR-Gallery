@@ -14,7 +14,7 @@ export default class AnimationLoop {
     start(){
 
         this.renderer.setAnimationLoop(
-            ()=>{
+            () => {
 
                 this.callback();
 

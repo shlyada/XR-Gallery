@@ -11,17 +11,21 @@ export default class Camera {
             1000
         );
 
-
         this.camera.position.set(
             0,
-            2,
-            5
+            4,
+            9
+        );
+
+        this.camera.lookAt(
+            0,
+            1.5,
+            0
         );
 
     }
 
-
-    resize(){
+    resize() {
 
         this.camera.aspect =
             window.innerWidth /

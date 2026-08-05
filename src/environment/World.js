@@ -6,6 +6,8 @@ export class World {
 
         this.scene = scene;
 
+        this.island = null;
+
         this.initialize();
 
     }
@@ -18,13 +20,23 @@ export class World {
 
     createEnvironment() {
 
-        const island = new Island();
+        this.island = new Island();
 
         this.scene.add(
-            island.group
+            this.island.group
         );
 
         console.log("XR World initialized");
+
+    }
+
+    update(elapsedTime) {
+
+        if (this.island) {
+
+            this.island.update(elapsedTime);
+
+        }
 
     }
 

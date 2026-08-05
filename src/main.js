@@ -3,61 +3,59 @@ import Camera from "./core/Camera.js";
 import Renderer from "./core/Renderer.js";
 import Lighting from "./core/Lighting.js";
 import AnimationLoop from "./core/AnimationLoop.js";
-import * as THREE from "three";
 import XRManager from "./xr/XRManager.js";
 import { World } from "./environment/World.js";
+import * as THREE from "three";
 
 
-// Create scene
-const scene =
-    new THREE.Scene();
+// Core Systems
+const sceneManager = new SceneManager();
+const camera = new Camera();
+const renderer = new Renderer();
 
 
-// Initialize core systems
-const sceneManager =
-    new SceneManager();
+// XR
+new XRManager(
+    renderer.renderer
+);
 
 
-const camera =
-    new Camera();
-
-
-const renderer =
-    new Renderer();
-
-
-// Initialize XR
-const xr =
-    new XRManager(
-        renderer.renderer
-    );
-
-
-// Initialize world environment
-const world =
-    new World(
-        sceneManager.scene
-    );
-
-
-// Initialize lighting
+// Lighting
 new Lighting(
     sceneManager.scene
 );
 
 
-// Start animation loop
-const loop =
-    new AnimationLoop(
-        renderer.renderer,
-        () => {
+// World
+const world = new World(
+    sceneManager.scene
+);
 
-            renderer.render(
-                sceneManager.scene,
-                camera.camera
-            );
 
-        }
-    );
+// Timer
+const clock = new THREE.Clock();
+
+
+// Animation Loop
+const loop = new AnimationLoop(
+
+    renderer.renderer,
+
+    () => {
+
+        const elapsedTime = clock.getElapsedTime();
+
+        world.update(
+            elapsedTime
+        );
+
+        renderer.render(
+            sceneManager.scene,
+            camera.camera
+        );
+
+    }
+
+);
 
 loop.start();
