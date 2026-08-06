@@ -6,7 +6,7 @@ import { createButterflyWorld } from './worlds/butterflyWorld.js';
 // Setup Scene, Camera, Renderer
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 1.6, 2);
+camera.position.set(0, 1.8, 5); // Well-positioned viewing distance
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -19,16 +19,22 @@ document.body.appendChild(VRButton.createButton(renderer));
 let currentWorldInstance = null;
 let currentWorldGroup = null;
 
+// Keyboard Movement State Tracking
+const keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
+
+window.addEventListener('keydown', (e) => {
+    if (keys.hasOwnProperty(e.code)) keys[e.code] = true;
+});
+window.addEventListener('keyup', (e) => {
+    if (keys.hasOwnProperty(e.code)) keys[e.code] = false;
+});
+
 // Function to Cleanly Switch Between Worlds
 function switchWorld(worldType) {
-    console.log(`Switching world to: ${worldType}`);
-
-    // 1. Clean up old world instance if it has a custom destroy method
     if (currentWorldInstance && typeof currentWorldInstance.destroy === 'function') {
         currentWorldInstance.destroy();
     }
     
-    // 2. Remove group from scene and dispose geometries/materials to prevent memory leaks
     if (currentWorldGroup) {
         scene.remove(currentWorldGroup);
         currentWorldGroup.traverse((child) => {
@@ -43,12 +49,13 @@ function switchWorld(worldType) {
         });
     }
 
-    // 3. Load the newly selected world
     if (worldType === 'default') {
         currentWorldInstance = new LotusSanctuary(scene);
         currentWorldGroup = currentWorldInstance.group;
+        camera.position.set(0, 1.6, 2);
     } else if (worldType === 'butterflies') {
         currentWorldGroup = createButterflyWorld(scene);
+        camera.position.set(0, 1.8, 6); // Perfect overview position for butterfly world
         currentWorldInstance = {
             update: (time, delta) => {
                 if (currentWorldGroup.userData && typeof currentWorldGroup.userData.update === 'function') {
@@ -59,40 +66,35 @@ function switchWorld(worldType) {
     }
 }
 
-// Initialize with your original world by default
+// Initialize with default world
 switchWorld('default');
 
-// Safe DOM Event Binding (Ensures buttons are fully loaded before attaching listeners)
+// UI Event Listeners
 window.addEventListener('DOMContentLoaded', () => {
-    const defaultBtn = document.getElementById('btn-default');
-    const butterflyBtn = document.getElementById('btn-butterflies');
-
-    if (defaultBtn) {
-        defaultBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            switchWorld('default');
-        });
-    } else {
-        console.warn("Element with ID 'btn-default' not found in DOM.");
-    }
-
-    if (butterflyBtn) {
-        butterflyBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            switchWorld('butterflies');
-        });
-    } else {
-        console.warn("Element with ID 'btn-butterflies' not found in DOM.");
-    }
+    document.getElementById('btn-default').addEventListener('click', (e) => {
+        e.preventDefault();
+        switchWorld('default');
+    });
+    document.getElementById('btn-butterflies').addEventListener('click', (e) => {
+        e.preventDefault();
+        switchWorld('butterflies');
+    });
 });
 
-// Main Render Loop
+// Main Render Loop with Keyboard Movement Handling
 const clock = new THREE.Clock();
 renderer.setAnimationLoop((timestamp, frame) => {
     const delta = clock.getDelta();
     const time = clock.getElapsedTime();
 
-    // Trigger frame updates for active world
+    // Arrow Key Navigation (Move & Zoom)
+    const moveSpeed = 4.0 * delta;
+    if (keys.ArrowUp) camera.position.z -= moveSpeed;    // Zoom In / Move Forward
+    if (keys.ArrowDown) camera.position.z += moveSpeed;  // Zoom Out / Move Backward
+    if (keys.ArrowLeft) camera.position.x -= moveSpeed;  // Move Left
+    if (keys.ArrowRight) camera.position.x += moveSpeed; // Move Right
+
+    // Trigger active world animations
     if (currentWorldInstance && typeof currentWorldInstance.update === 'function') {
         currentWorldInstance.update(time, delta);
     }
