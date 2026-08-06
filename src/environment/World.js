@@ -1,40 +1,26 @@
-import { LotusSanctuary } from "./LotusSanctuary.js";
-
+import { LotusSanctuary } from './LotusSanctuary.js';
 
 export class World {
+  constructor(scene) {
+    this.scene = scene;
+    this.sanctuary = null;
+    
+    this.init();
+  }
 
+  init() {
+    // Instantiate the procedural Lotus Sanctuary environment
+    this.sanctuary = new LotusSanctuary(this.scene);
+  }
 
-    constructor(scene){
-
-        this.scene = scene;
-
-
-        this.createWorld();
-
+  /**
+   * Main frame update for world dynamic elements (e.g. water movement, fireflies, particle physics)
+   * @param {number} time - Elapsed time in seconds
+   * @param {number} deltaTime - Time elapsed since last frame
+   */
+  update(time, deltaTime) {
+    if (this.sanctuary) {
+      this.sanctuary.update(time, deltaTime);
     }
-
-
-
-    createWorld(){
-
-        this.sanctuary =
-            new LotusSanctuary(
-                this.scene
-            );
-
-    }
-
-
-
-    update(elapsedTime){
-
-        // Future systems will update here:
-        // butterflies
-        // water animation
-        // fireflies
-        // particles
-
-    }
-
-
+  }
 }
