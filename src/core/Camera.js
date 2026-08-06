@@ -14,13 +14,13 @@ export default class Camera {
         // Pull back and look slightly down toward the island
         this.camera.position.set(
             0,
-            4,
+            3,
             12
         );
 
         this.camera.lookAt(
             0,
-            2,
+            1,
             0
         );
 

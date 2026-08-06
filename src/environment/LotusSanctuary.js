@@ -1,5 +1,5 @@
 import * as THREE from "three";
-
+import { EnvironmentLoader } from "./EnvironmentLoader.js";
 
 export class LotusSanctuary {
 
@@ -22,22 +22,130 @@ export class LotusSanctuary {
         );
 
 
+        this.loader =
+            new EnvironmentLoader(
+                scene
+            );
+
+
         this.createPlaceholderWorld();
+
+
+        this.loadAssets()
+            .catch(error => {
+
+                console.error(
+                    "Asset loading failed:",
+                    error
+                );
+
+            });
+
+
+    }
+
+    async loadAssets(){
+
+
+        await this.loader.load(
+
+            "Main Tree",
+
+            "/models/vegetation/treeGN.glb",
+
+            [-8,0,-5],
+
+            0.15
+
+        );
+
+
+
+        await this.loader.load(
+
+            "Forest Tree",
+
+            "/models/vegetation/forestPack.glb",
+
+            [8,0,-8],
+
+            0.12
+
+        );
+
+
+
+        await this.loader.load(
+
+            "Lotus Flower",
+
+            "/models/flowers/lotus.glb",
+
+            [0,0,1],
+
+            0.08
+
+        );
+
+
+
+        await this.loader.load(
+
+            "Butterfly",
+
+            "/models/creatures/butterfly.glb",
+
+            [2,2,0],
+
+            0.05
+
+        );
 
 
     }
 
 
 
-    createPlaceholderWorld(){
+    createTerrain(){
 
-        this.createTerrain();
 
-        this.createPond();
+        const geometry =
+            new THREE.CircleGeometry(
+                20,
+                64
+            );
 
-        this.createWaterfallArea();
 
-        this.createForestBoundary();
+        const material =
+            new THREE.MeshStandardMaterial({
+
+                color:0x557755,
+
+                roughness:1
+
+            });
+
+
+
+        const terrain =
+            new THREE.Mesh(
+                geometry,
+                material
+            );
+
+
+        terrain.rotation.x =
+            -Math.PI/2;
+
+
+        terrain.name =
+            "Sanctuary Ground";
+
+
+        this.group.add(
+            terrain
+        );
+
 
     }
 
@@ -46,7 +154,7 @@ export class LotusSanctuary {
     createPond(){
 
         const geometry = new THREE.CircleGeometry(
-            5,
+            7,
             64
         );
 
@@ -185,6 +293,17 @@ export class LotusSanctuary {
 
     }
 
+    
+    createPlaceholderWorld(){
+
+        // Temporary placeholder world
+        // Real assets will replace these
+
+        this.createPond();
+
+        this.createTerrain();
+
+    }
 
 
     createForestBoundary(){

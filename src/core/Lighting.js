@@ -1,43 +1,56 @@
 import * as THREE from "three";
 
+
 export default class Lighting {
 
-    constructor(scene) {
 
-        const ambient = new THREE.HemisphereLight(
-            0xcceeff,
-            0x445533,
-            1.4
+    constructor(scene){
+
+
+        const ambient =
+            new THREE.HemisphereLight(
+
+                0xffffff,
+
+                0x557755,
+
+                2
+
+            );
+
+
+        scene.add(
+            ambient
         );
 
-        scene.add(ambient);
 
-        const sun = new THREE.DirectionalLight(
-            0xfff5dd,
-            4
-        );
+
+        const sun =
+            new THREE.DirectionalLight(
+
+                0xffffff,
+
+                3
+
+            );
+
 
         sun.position.set(
-            15,
+            10,
             20,
             10
         );
 
+
         sun.castShadow = true;
 
-        sun.shadow.mapSize.set(
-            2048,
-            2048
+
+        scene.add(
+            sun
         );
 
-        scene.add(sun);
-
-        scene.fog = new THREE.Fog(
-            0xcbefff,
-            18,
-            60
-        );
 
     }
+
 
 }

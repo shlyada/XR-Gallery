@@ -6,7 +6,20 @@ export default class SceneManager {
 
         this.scene = new THREE.Scene();
 
-        this.scene.background = null;
+        this.scene.background = new THREE.Color(
+            0x87ceeb
+        );
+
+        this.scene.fog =
+            new THREE.Fog(
+
+            0x87ceeb,
+
+            10,
+
+            60
+
+        );
 
     }
 
