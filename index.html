@@ -1,13 +1,53 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ipmd-xr-gallery</title>
-  </head>
-  <body>
-    <div id="app"></div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebXR Therapeutic Sanctuaries</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; }
+        #menu {
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+        .world-btn {
+            background: rgba(15, 25, 45, 0.7);
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            color: #ffffff;
+            padding: 12px 24px;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+        }
+        .world-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+            border-color: #ffffff;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div id="menu">
+        <button class="world-btn" id="btn-default">Lotus Sanctuary</button>
+        <button class="world-btn" id="btn-butterflies">Dreaming of Butterflies</button>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
     <script type="module" src="/src/main.js"></script>
-  </body>
+</body>
 </html>

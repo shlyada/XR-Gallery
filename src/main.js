@@ -1,86 +1,108 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
-import { World } from './environment/World.js';
+import { VRButton } from 'three/addons/webxr/VRButton.js';
+import { LotusSanctuary } from './environment/LotusSanctuary.js';
+import { createButterflyWorld } from './worlds/butterflyWorld.js';
 
-class App {
-  constructor() {
-    this.container = document.body;
-    this.clock = new THREE.Clock();
+// Setup Scene, Camera, Renderer
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, 1.6, 2);
 
-    this.init();
-  }
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.xr.enabled = true;
+document.body.appendChild(renderer.domElement);
+document.body.appendChild(VRButton.createButton(renderer));
 
-  init() {
-    // --- 1. Scene Setup ---
-    this.scene = new THREE.Scene();
+// World Management State
+let currentWorldInstance = null;
+let currentWorldGroup = null;
 
-    // --- 2. Camera Setup ---
-    this.camera = new THREE.PerspectiveCamera(
-      75,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      1000
-    );
-    // Position user at comfortable eye level near the lotus pond
-    this.camera.position.set(0, 1.6, 8);
+// Function to Cleanly Switch Between Worlds
+function switchWorld(worldType) {
+    console.log(`Switching world to: ${worldType}`);
 
-    // --- 3. Renderer Setup ---
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.0;
+    // 1. Clean up old world instance if it has a custom destroy method
+    if (currentWorldInstance && typeof currentWorldInstance.destroy === 'function') {
+        currentWorldInstance.destroy();
+    }
     
-    // WebXR Enablement
-    this.renderer.xr.enabled = true;
-    this.container.appendChild(this.renderer.domElement);
-    this.container.appendChild(VRButton.createButton(this.renderer));
-
-    // --- 4. Desktop Orbit Controls (Fallback when not in VR) ---
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    this.controls.enableDamping = true;
-    this.controls.dampingFactor = 0.05;
-    this.controls.target.set(0, 0.5, 0);
-
-    // --- 5. Initialize Sanctuary World ---
-    this.world = new World(this.scene);
-
-    // --- 6. Event Listeners ---
-    window.addEventListener('resize', this.onWindowResize.bind(this));
-
-    // --- 7. Start Loop ---
-    this.renderer.setAnimationLoop(this.animate.bind(this));
-  }
-
-  onWindowResize() {
-    this.camera.aspect = window.innerWidth / window.innerHeight;
-    this.camera.updateProjectionMatrix();
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-  }
-
-  animate() {
-    const deltaTime = this.clock.getDelta();
-    const elapsedTime = this.clock.getElapsedTime();
-
-    // Update orbit controls if not currently presenting in VR
-    if (!this.renderer.xr.isPresenting) {
-      this.controls.update();
+    // 2. Remove group from scene and dispose geometries/materials to prevent memory leaks
+    if (currentWorldGroup) {
+        scene.remove(currentWorldGroup);
+        currentWorldGroup.traverse((child) => {
+            if (child.geometry) child.geometry.dispose();
+            if (child.material) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(m => m.dispose());
+                } else {
+                    child.material.dispose();
+                }
+            }
+        });
     }
 
-    // Update environment & sanctuary animations
-    if (this.world) {
-      this.world.update(elapsedTime, deltaTime);
+    // 3. Load the newly selected world
+    if (worldType === 'default') {
+        currentWorldInstance = new LotusSanctuary(scene);
+        currentWorldGroup = currentWorldInstance.group;
+    } else if (worldType === 'butterflies') {
+        currentWorldGroup = createButterflyWorld(scene);
+        currentWorldInstance = {
+            update: (time, delta) => {
+                if (currentWorldGroup.userData && typeof currentWorldGroup.userData.update === 'function') {
+                    currentWorldGroup.userData.update(time, delta);
+                }
+            }
+        };
     }
-
-    // Render frame
-    this.renderer.render(this.scene, this.camera);
-  }
 }
 
-// Launch Application when DOM is ready
+// Initialize with your original world by default
+switchWorld('default');
+
+// Safe DOM Event Binding (Ensures buttons are fully loaded before attaching listeners)
 window.addEventListener('DOMContentLoaded', () => {
-  new App();
+    const defaultBtn = document.getElementById('btn-default');
+    const butterflyBtn = document.getElementById('btn-butterflies');
+
+    if (defaultBtn) {
+        defaultBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchWorld('default');
+        });
+    } else {
+        console.warn("Element with ID 'btn-default' not found in DOM.");
+    }
+
+    if (butterflyBtn) {
+        butterflyBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchWorld('butterflies');
+        });
+    } else {
+        console.warn("Element with ID 'btn-butterflies' not found in DOM.");
+    }
+});
+
+// Main Render Loop
+const clock = new THREE.Clock();
+renderer.setAnimationLoop((timestamp, frame) => {
+    const delta = clock.getDelta();
+    const time = clock.getElapsedTime();
+
+    // Trigger frame updates for active world
+    if (currentWorldInstance && typeof currentWorldInstance.update === 'function') {
+        currentWorldInstance.update(time, delta);
+    }
+
+    renderer.render(scene, camera);
+});
+
+// Window Resize Handler
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
 });

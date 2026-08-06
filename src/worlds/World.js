@@ -1,4 +1,4 @@
-import { LotusSanctuary } from './LotusSanctuary.js';
+import { LotusSanctuary } from '../environment/LotusSanctuary.js';
 
 export class World {
   constructor(scene) {
