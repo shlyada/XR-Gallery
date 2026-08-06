@@ -1,61 +1,39 @@
-import SceneManager from "./core/SceneManager.js";
-import Camera from "./core/Camera.js";
-import Renderer from "./core/Renderer.js";
-import Lighting from "./core/Lighting.js";
-import AnimationLoop from "./core/AnimationLoop.js";
-import XRManager from "./xr/XRManager.js";
-import { World } from "./environment/World.js";
-import * as THREE from "three";
+import * as THREE from 'three';
+//import { Timer } from 'three/addons/misc/Timer.js';
+import { SceneManager } from './core/SceneManager.js';
+import { Camera } from './core/Camera.js';
+import { Renderer } from './core/Renderer.js';
+import { Lighting } from './core/Lighting.js';
+import { AnimationLoop } from './core/AnimationLoop.js';
+import { World } from './environment/World.js';
+import { EnvironmentLoader } from './environment/EnvironmentLoader.js';
 
+async function init() {
+    // 1. Core Scene Setup
+    const sceneManager = new SceneManager();
+    const cameraSystem = new Camera();
+    const rendererSystem = new Renderer();
+    const lighting = new Lighting(sceneManager.scene);
 
-// Core Systems
-const sceneManager = new SceneManager();
-const camera = new Camera();
-const renderer = new Renderer();
+    // 2. Loaders & Environment
+    const loader = new EnvironmentLoader();
+    const world = new World(sceneManager.scene, loader);
+    await world.init();
 
+    // 3. Timer Fix (Replaces deprecated THREE.Clock)
+    const timer = new Timer();
 
-// XR
-new XRManager(
-    renderer.renderer
-);
+    // 4. Start Animation Loop
+    const animationLoop = new AnimationLoop(() => {
+        timer.update();
+        const delta = timer.getDelta();
 
+        // Update World & Render Frame
+        world.update(delta);
+        rendererSystem.render(sceneManager.scene, cameraSystem.camera);
+    });
 
-// Lighting
-new Lighting(
-    sceneManager.scene
-);
+    animationLoop.start(rendererSystem.instance);
+}
 
-
-// World
-const world = new World(
-    sceneManager.scene
-);
-
-
-// Timer
-const clock = new THREE.Clock();
-
-
-// Animation Loop
-const loop = new AnimationLoop(
-
-    renderer.renderer,
-
-    () => {
-
-        const elapsedTime = clock.getElapsedTime();
-
-        world.update(
-            elapsedTime
-        );
-
-        renderer.render(
-            sceneManager.scene,
-            camera.camera
-        );
-
-    }
-
-);
-
-loop.start();
+init().catch((err) => console.error("Initialization Error:", err));

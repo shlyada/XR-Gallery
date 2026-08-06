@@ -1,27 +1,19 @@
-export default class AnimationLoop {
-
-
-    constructor(renderer, callback){
-
-        this.renderer = renderer;
-        this.callback = callback;
-
-        this.start();
-
+export class AnimationLoop {
+    constructor(updateCallback) {
+        this.updateCallback = updateCallback;
     }
 
-
-    start(){
-
-        this.renderer.setAnimationLoop(
-            () => {
-
-                this.callback();
-
+    start(rendererInstance) {
+        rendererInstance.setAnimationLoop((timestamp, frame) => {
+            if (this.updateCallback) {
+                this.updateCallback(timestamp, frame);
             }
-        );
-
+        });
     }
 
-
+    stop(rendererInstance) {
+        rendererInstance.setAnimationLoop(null);
+    }
 }
+
+export default AnimationLoop;

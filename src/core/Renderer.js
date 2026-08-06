@@ -1,60 +1,39 @@
-import * as THREE from "three";
+import * as THREE from 'three';
 
-export default class Renderer {
+export class Renderer {
+    constructor(container = document.body) {
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    constructor() {
-
-        this.renderer = new THREE.WebGLRenderer({
-
-            antialias: true,
-            alpha: false
-
-        });
-
-        this.renderer.setSize(
-            window.innerWidth,
-            window.innerHeight
-        );
-
-        this.renderer.setPixelRatio(
-            Math.min(window.devicePixelRatio, 2)
-        );
-
-        // Better color management
-        this.renderer.outputColorSpace =
-            THREE.SRGBColorSpace;
-
-        // Filmic tone mapping
-        this.renderer.toneMapping =
-            THREE.ACESFilmicToneMapping;
-
-        this.renderer.toneMappingExposure = 1.15;
-
+        // Enabled Shadows & Updated Shadow Map Type (Fixes Deprecation Warning)
         this.renderer.shadowMap.enabled = true;
-        this.renderer.shadowMap.type =
-            THREE.PCFSoftShadowMap;
+        this.renderer.shadowMap.type = THREE.PCFShadowMap;
 
-        this.renderer.xr.enabled = false;
+        // Color Space & Tone Mapping setup for modern Three.js
+        this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+        this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        this.renderer.toneMappingExposure = 1.0;
 
-        document.body.appendChild(
-            this.renderer.domElement
-        );
+        container.appendChild(this.renderer.domElement);
 
+        window.addEventListener('resize', () => this.onWindowResize());
+    }
+
+    onWindowResize() {
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     }
 
     render(scene, camera) {
-
-        this.renderer.render(scene, camera);
-
+        if (scene && camera) {
+            this.renderer.render(scene, camera);
+        }
     }
 
-    resize() {
-
-        this.renderer.setSize(
-            window.innerWidth,
-            window.innerHeight
-        );
-
+    get instance() {
+        return this.renderer;
     }
-
 }
+
+export default Renderer;
