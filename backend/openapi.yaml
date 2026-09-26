@@ -1,0 +1,193 @@
+openapi: 3.0.3
+
+info:
+  title: BloomXR Artwork API
+  version: 1.0.0
+  description: Persistent artwork library API for BloomXR.
+
+servers:
+  - url: http://localhost:3001
+    description: Local BloomXR backend
+
+paths:
+  /api/health:
+    get:
+      summary: Check backend health
+
+      responses:
+        "200":
+          description: Backend status
+
+  /api/artworks:
+    get:
+      summary: List artwork
+
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 40
+            default: 18
+
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+
+        - name: q
+          in: query
+          schema:
+            type: string
+
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum:
+              - newest
+              - title
+              - artist
+            default: newest
+
+      responses:
+        "200":
+          description: Paginated artwork collection
+
+  /api/artworks/{id}:
+    get:
+      summary: Get artwork metadata
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: Artwork metadata
+
+        "404":
+          description: Artwork not found
+
+    delete:
+      summary: Permanently delete user-created artwork
+
+      description: >
+        Permanently deletes a BloomXR user-created artwork,
+        including the stored image file, generated thumbnail,
+        and catalog entry. Original library artwork cannot
+        be deleted through this endpoint.
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: Artwork permanently deleted
+
+        "403":
+          description: Original library artwork cannot be deleted
+
+        "404":
+          description: Artwork not found
+
+        "500":
+          description: Failed to delete artwork
+
+  /api/artworks/{id}/image:
+    get:
+      summary: Get original artwork
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: Original image
+
+        "404":
+          description: Artwork not found
+
+  /api/artworks/{id}/thumbnail:
+    get:
+      summary: Get optimized gallery thumbnail
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: Thumbnail
+
+        "404":
+          description: Artwork not found
+
+        "500":
+          description: Thumbnail generation failed
+
+  /api/artworks/upload:
+    post:
+      summary: Save user-created artwork
+
+      requestBody:
+        required: true
+
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+
+              required:
+                - file
+
+              properties:
+                file:
+                  type: string
+                  format: binary
+
+                title:
+                  type: string
+                  description: Artwork title
+
+                artist:
+                  type: string
+                  description: Artist name
+
+      responses:
+        "201":
+          description: Artwork permanently saved
+
+        "400":
+          description: No image file was uploaded
+
+        "500":
+          description: Artwork upload failed
+
+  /api/artworks/rescan:
+    post:
+      summary: Rescan configured artwork drives or folders
+
+      responses:
+        "200":
+          description: Library rescanned
+
+        "500":
+          description: Library rescan failed
